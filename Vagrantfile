@@ -48,7 +48,11 @@ Vagrant.configure("2") do |config|
     #vb.gui = true
 
     # Customize the amount of memory on the VM:
-    vb.memory = "6144"
+    vb.memory = "12288"
+
+    # Add Disk
+    vb.customize ['createmedium', 'disk', '--filename', "disk/sdb.vdi", '--format', 'VDI', '--size', 200 * 1024]
+    vb.customize ['storageattach', :id,'--storagectl', 'IDE', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', "disk/sdb.vdi"]
 
     # Add NIC
     vb.customize ["modifyvm", :id, "--nic2", "hostonly"]
@@ -85,6 +89,10 @@ Vagrant.configure("2") do |config|
     setenforce 0
     systemctl stop NetworkManager
     systemctl disable NetworkManager
+    pvcreate /dev/sdb
+    vgextend VolGroup00 /dev/sdb
+    lvextend -l +100%FREE /dev/VolGroup00/LogVol00
+    xfs_growfs /dev/VolGroup00/LogVol00
     yum install -y openstack-packstack
     packstack --gen-answer-file=~/answer.txt
     sed -i 's/^CONFIG_MANILA_INSTALL=n$/CONFIG_MANILA_INSTALL=y/' ~/answer.txt
