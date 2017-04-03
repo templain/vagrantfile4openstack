@@ -39,6 +39,9 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
+  # graceful timeout
+  config.vm.graceful_halt_timeout = 600 # seconds
+
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
@@ -51,7 +54,7 @@ Vagrant.configure("2") do |config|
     vb.memory = "12288"
 
     # Add Disk
-    vb.customize ['createmedium', 'disk', '--filename', "disk/sdb.vdi", '--format', 'VDI', '--size', 200 * 1024]
+    vb.customize ['createmedium', 'disk', '--filename', "disk/sdb.vdi", '--format', 'VDI', '--size', 500 * 1024]
     vb.customize ['storageattach', :id,'--storagectl', 'IDE', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', "disk/sdb.vdi"]
 
     # Add NIC
@@ -99,6 +102,7 @@ Vagrant.configure("2") do |config|
     sed -i 's/^CONFIG_TROVE_INSTALL=n$/CONFIG_TROVE_INSTALL=y/' ~/answer.txt
     sed -i 's/^CONFIG_HEAT_INSTALL=n$/CONFIG_HEAT_INSTALL=y/' ~/answer.txt
     sed -i 's/10.0.2.15/192.168.33.10/' ~/answer.txt
+    sed -i 's/^CONFIG_CINDER_VOLUMES_SIZE=20G$/CONFIG_CINDER_VOLUMES_SIZE=400G/' ~/answer.txt
     packstack --answer-file=~/answer.txt
     cp /home/vagrant/ifcfg-br-ex /etc/sysconfig/network-scripts/
     cp /home/vagrant/ifcfg-eth0 /etc/sysconfig/network-scripts/
